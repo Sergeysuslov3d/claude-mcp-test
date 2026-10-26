@@ -128,14 +128,12 @@ html,body{height:100%;overflow:hidden}
 #scene{object-fit:cover}
 /* pulled back: the whole scene is visible instead of being cropped to the window; --zoom is the share of the window it fills */
 :root{--zoom:.78}
-@media(min-width:700px){
-  #screen{background:#0a0818}
-  #sceneBg{position:absolute;left:-6%;top:-6%;width:112%;height:112%;display:block;filter:blur(26px) saturate(1.35) brightness(.55);image-rendering:auto}
-  #scene{position:relative}
-  #screen:fullscreen #sceneBg{display:none}
-  #scene{object-fit:contain;transform:scale(var(--zoom));transform-origin:50% 40%}
-  #screen:fullscreen #scene{transform:none}
-}
+#screen{background:#0a0818}
+#sceneBg{position:absolute;left:-6%;top:-6%;width:112%;height:112%;display:block;filter:blur(26px) saturate(1.35) brightness(.55);image-rendering:auto}
+#scene{position:relative;object-fit:contain;transform-origin:50% 40%}
+@media(min-width:700px){ #scene{transform:scale(var(--zoom))} }
+#screen:fullscreen #scene{transform:none}
+#screen:fullscreen #sceneBg{display:none}
 #top{position:fixed;top:10px;right:12px;left:auto;z-index:12;gap:10px;padding:6px 10px;background:rgba(10,6,22,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
 #top .top-links{margin-left:0}
 #top .fan-tag{display:none}
