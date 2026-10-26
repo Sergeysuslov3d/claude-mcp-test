@@ -1,0 +1,64 @@
+:root{ --bg:#0d0b14; --card:#12101a; --line:#26222f; --ink:#f4eefa; --dim:#6e6880; --hot:#ff4fa0; --cyan:#4ae8ff; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:'Rubik',system-ui,sans-serif; overflow:hidden; }
+a{ color:inherit; text-decoration:none; }
+
+.vtop{ position:fixed; inset:0 0 auto 0; height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; z-index:5; }
+.brand{ font-family:'Press Start 2P',monospace; font-size:12px; letter-spacing:.5px; display:flex; align-items:center; gap:10px; }
+.brand b{ color:var(--hot); font-weight:400; }
+.logo-px{ width:16px; height:16px; background:linear-gradient(135deg,var(--hot) 50%,var(--cyan) 50%); box-shadow:2px 2px 0 #000; }
+.vtop nav{ display:flex; gap:6px; }
+.vtop nav a{ font-size:13px; padding:7px 14px; border-radius:999px; color:var(--dim); border:1px solid transparent; }
+.vtop nav a:hover{ color:var(--ink); }
+.vtop nav a.on{ color:var(--ink); border-color:var(--line); background:#1a1724; }
+
+.deck{ position:absolute; left:24px; right:24px; top:70px; bottom:44px; border:1px solid var(--line); border-radius:26px; background:radial-gradient(120% 90% at 0% 50%,#1c1426 0%,var(--card) 55%); overflow:hidden; }
+#vinyl{ position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:grab; }
+#vinyl.drag{ cursor:grabbing; }
+.meta{ position:absolute; right:28px; top:24px; text-align:right; pointer-events:none; }
+.meta b{ display:block; font-size:15px; font-weight:700; }
+.meta span{ font-size:11px; color:var(--dim); letter-spacing:.5px; }
+.meta span::before{ content:'●'; color:var(--hot); margin-right:6px; font-size:9px; }
+
+/* the melody, line by line, receding into the dark */
+.lyrics{ position:absolute; left:51%; right:3%; top:0; bottom:0; perspective:900px; pointer-events:none; }
+.line{ position:absolute; left:0; top:50%; white-space:nowrap; font-family:'JetBrains Mono',monospace; font-weight:500; font-size:clamp(16px,2.1vw,30px); color:#3a3546;
+  transform-origin:0 50%; transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .55s,filter .55s,color .4s; will-change:transform; }
+.line .lab{ font-size:.42em; color:var(--hot); opacity:.8; margin-right:.8em; letter-spacing:.06em; vertical-align:middle; }
+.line .tk{ display:inline-block; padding:.04em .16em; margin:0 .08em; border-radius:.25em; transition:background .15s,color .15s,transform .15s; position:relative; }
+.line.cur{ color:#ece6f6; }
+.line .tk.done{ color:#cfc8de; }
+.line .tk.ghost{ color:#4a4458; }
+.line .tk.hit{ color:#0d0b14; transform:translateY(-.06em) scale(1.06); }
+.tk.hit.c0{ background:#8dffb0; } .tk.hit.c1{ background:#ff6b8a; } .tk.hit.c2{ background:#ffe08a; } .tk.hit.c3{ background:#b9a6ff; }
+.tk.hit::after{ content:''; position:absolute; left:50%; top:-.62em; width:.34em; height:.34em; margin-left:-.17em; border:2px solid currentColor; color:inherit; background:inherit; filter:brightness(1.2); animation:hop .32s ease-out; }
+@keyframes hop{ from{ transform:translateY(.3em) scale(.4); opacity:0 } to{ transform:none; opacity:1 } }
+
+.hint{ position:absolute; left:28px; bottom:22px; font-size:11px; color:var(--dim); letter-spacing:.4px; transition:opacity 1s; pointer-events:none; }
+.ctrl{ position:absolute; left:50%; bottom:16px; transform:translateX(-50%); display:flex; gap:10px; align-items:center; }
+.ctrl button{ width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:#16131f; color:var(--ink); font-size:12px; cursor:pointer; }
+.ctrl button.big{ width:44px; height:44px; font-size:15px; background:var(--ink); color:#0d0b14; border-color:var(--ink); }
+.ctrl button:hover{ border-color:#4a4458; }
+.time{ position:absolute; right:28px; bottom:26px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dim); }
+.time b{ color:var(--ink); font-weight:700; }
+.vfoot{ position:fixed; left:0; right:0; bottom:12px; text-align:center; font-size:10px; color:#4a4458; }
+
+@media (max-width:760px){
+  .vtop{ padding:0 14px; } .brand{ font-size:10px; }
+  .deck{ left:10px; right:10px; top:62px; bottom:36px; border-radius:18px; }
+  .lyrics{ left:6%; right:4%; top:46%; }
+  .line{ font-size:17px; }
+  .meta{ right:16px; top:14px; } .hint{ display:none; } .time{ bottom:68px; right:18px; }
+  .vfoot{ font-size:9px; padding:0 10px; }
+}
+@media (prefers-reduced-motion:reduce){ .line,.tk{ transition:none; } .tk.hit::after{ animation:none; } }
+/* music mode switch sits in the header bar here (the tonearm owns the top of the deck) */
+body .rm-switch{ top:11px; }
+@media (max-width:760px){ body .rm-switch{ top:auto; bottom:116px; } }
+@media (max-width:520px){ .brand{ font-size:0; gap:0; } .vtop nav{ gap:2px; } .vtop nav a{ padding:6px 9px; font-size:12px; } }
+/* mirrored layout: record on the right, the melody on the left */
+body.mirror .lyrics{ left:4%; right:52%; overflow:hidden; -webkit-mask-image:linear-gradient(90deg,#000 80%,transparent); mask-image:linear-gradient(90deg,#000 80%,transparent); }
+body.mirror .meta{ right:auto; left:28px; text-align:left; }
+body.mirror .hint{ left:auto; right:28px; bottom:60px; }
+body.mirror .time{ right:auto; left:28px; }
+@media (max-width:760px){ body.mirror .lyrics{ left:6%; right:4%; -webkit-mask-image:none; mask-image:none; } body .line{ font-size:15px; } body.mirror .time, body .time{ top:64px; bottom:auto; right:16px; left:auto; } body.mirror .meta{ left:auto; right:16px; text-align:right; } body.mirror .time{ left:auto; right:18px; } }
