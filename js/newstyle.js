@@ -165,11 +165,11 @@
       ctx.globalCompositeOperation='screen'; ctx.fillStyle=g; ctx.fillRect(0,y-70,W2,104);
       // 4. moon / sun halo
       const sp=SKYX.pos(sc,T), body=T.moon.vis>.05?sp.moon:(T.sun.vis>.05?sp.sun:null);
-      if(body){ const vis=(body===sp.moon?T.moon.vis:T.sun.vis), cx=body.x*2, cy=body.y*2, rgb=body===sp.moon?'190,200,255':'255,200,130';
+      if(body&&!NS.building){ const vis=(body===sp.moon?T.moon.vis:T.sun.vis), cx=body.x*2, cy=body.y*2, rgb=body===sp.moon?'190,200,255':'255,200,130';
         const r1=ctx.createRadialGradient(cx,cy,6,cx,cy,120); r1.addColorStop(0,'rgba('+rgb+','+.34*vis+')'); r1.addColorStop(.35,'rgba('+rgb+','+.1*vis+')'); r1.addColorStop(1,'rgba('+rgb+',0)');
         ctx.fillStyle=r1; ctx.fillRect(cx-120,cy-120,240,240); }
       // 5. shooting star: one every ~23 s on clear dark nights
-      if(T.P.stars>.5&&(!weather||weather==='clear')){
+      if(!NS.building&&T.P.stars>.5&&(!weather||weather==='clear')){
         const cyc=23, k=Math.floor(t/cyc), ph=(t%cyc)/1.1;
         if(ph<1){ const sx=120+hash(k)*640, sy=20+hash(k+9)*120, d=ph*130, a=Math.sin(ph*Math.PI);
           const x1=sx+d, y1=sy+d*.42, tg=ctx.createLinearGradient(x1,y1,x1-70,y1-30);
