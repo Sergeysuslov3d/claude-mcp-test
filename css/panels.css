@@ -129,7 +129,7 @@ html,body{height:100%;overflow:hidden}
 /* pulled back: the whole scene is visible instead of being cropped to the window; --zoom is the share of the window it fills */
 :root{--zoom:.9}
 #screen{background:#0a0818}
-#sceneBg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;filter:blur(5px) saturate(1.1) brightness(.82);transform:scale(1.04);image-rendering:auto}
+#sceneBg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;filter:brightness(.88);image-rendering:pixelated}
 #scene{position:relative;object-fit:contain;transform-origin:50% 40%}
 @media(min-width:700px){ #scene{transform:scale(var(--zoom))} }
 #screen:fullscreen #scene{transform:none}
