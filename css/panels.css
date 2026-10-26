@@ -127,9 +127,9 @@ html,body{height:100%;overflow:hidden}
 #screen{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;aspect-ratio:auto;min-width:0;box-shadow:none;z-index:1}
 #scene{object-fit:cover}
 /* pulled back: the whole scene is visible instead of being cropped to the window; --zoom is the share of the window it fills */
-:root{--zoom:.78}
+:root{--zoom:.9}
 #screen{background:#0a0818}
-#sceneBg{position:absolute;left:-6%;top:-6%;width:112%;height:112%;display:block;filter:blur(26px) saturate(1.35) brightness(.55);image-rendering:auto}
+#sceneBg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;filter:blur(5px) saturate(1.1) brightness(.82);transform:scale(1.04);image-rendering:auto}
 #scene{position:relative;object-fit:contain;transform-origin:50% 40%}
 @media(min-width:700px){ #scene{transform:scale(var(--zoom))} }
 #screen:fullscreen #scene{transform:none}
