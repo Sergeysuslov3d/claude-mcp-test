@@ -132,6 +132,71 @@
       if(sc.water){ const [y0,y1,o]=sc.water, cl=(o&&o.clip)||[0,480]; mirror(low,y0,y1,cl[0],cl[1],.42,t,1); }
       const wt=NS.WET[sc.id]; if(wt){ const k=wt[2]*(weather&&weather!=='clear'?1.25:.8); mirror(low,wt[0],wt[1],0,480,k,t,.6); }
     }
-    return render.apply(this,arguments);
+    const out=render.apply(this,arguments);
+    if(NS.on&&NS.finish&&opt&&opt.q==='high') finish(ctx,t,sc,weather,T);
+    return out;
   };
+
+  /* ---------- finishing layer: colour pop, horizon haze, moon halo, water glints, mist, shooting stars ---------- */
+  NS.finish=true;
+  const W2=960, H2=540, mk=(w,h)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
+  const tmp=mk(W2,H2), tctx=tmp.getContext('2d'), glowA=mk(240,135), gA=glowA.getContext('2d'), glowB=mk(120,68), gB=glowB.getContext('2d');
+  const hash=n=>{ const v=Math.sin(n*127.1+311.7)*43758.5453; return v-Math.floor(v); };
+  // ground mist: [horizon-relative y in design units, band height, strength, rgb]
+  NS.MIST={ grassrivers:[150,60,.5,'150,190,200'], kalaga:[150,46,.55,'150,170,210'], lake:[160,40,.3,'160,150,210'], gellhorn:[222,48,.22,'190,150,210'], ambrosia:[160,32,.3,'200,170,190'] };
+  function rgbOf(hex){ const n=parseInt(hex.slice(1),16); return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255); }
+  function finish(ctx,t,sc,weather,T){
+    const night=T?Math.max(T.P.lamp,.12):1, under=!!sc.under, hz=sc.sky&&(sc.sky.horizon||sc.sky.y+sc.sky.h)||140;
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha=1;
+    // 1. colour pop: richer saturation and a touch more contrast
+    try{ tctx.clearRect(0,0,W2,H2); tctx.drawImage(ctx.canvas,0,0); ctx.filter='saturate('+(1.03+.19*night).toFixed(3)+') contrast('+(1+.08*night).toFixed(3)+')'; ctx.drawImage(tmp,0,0); ctx.filter='none'; }catch(e){ ctx.filter='none'; }
+    // 2. tight second bloom: only the brightest lights (neon, windows, lamps) spill
+    try{
+      gA.clearRect(0,0,240,135); gA.filter='brightness(.62) contrast(2.6) saturate(1.3)'; gA.drawImage(ctx.canvas,0,0,240,135); gA.filter='none';
+      gB.clearRect(0,0,120,68); gB.drawImage(glowA,0,0,120,68);
+      ctx.globalCompositeOperation='screen'; ctx.imageSmoothingEnabled=true; ctx.globalAlpha=.34*night+.02; ctx.drawImage(glowB,0,0,W2,H2); ctx.globalAlpha=.18*night; ctx.drawImage(glowA,0,0,W2,H2);
+    }catch(e){ gA.filter='none'; }
+    ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+    if(!under&&T){
+      // 3. horizon haze in the colour of the sky's lower stops
+      const sky=TOD.PAL[T.a].sky, col=rgbOf(sky[sky.length-1].length===7?sky[sky.length-1]:'#8a2a6c'), y=hz*2;
+      const g=ctx.createLinearGradient(0,y-70,0,y+34); g.addColorStop(0,'rgba('+col+',0)'); g.addColorStop(.62,'rgba('+col+','+(.26*(.6+night*.4))+')'); g.addColorStop(1,'rgba('+col+',0)');
+      ctx.globalCompositeOperation='screen'; ctx.fillStyle=g; ctx.fillRect(0,y-70,W2,104);
+      // 4. moon / sun halo
+      const sp=SKYX.pos(sc,T), body=T.moon.vis>.05?sp.moon:(T.sun.vis>.05?sp.sun:null);
+      if(body){ const vis=(body===sp.moon?T.moon.vis:T.sun.vis), cx=body.x*2, cy=body.y*2, rgb=body===sp.moon?'190,200,255':'255,200,130';
+        const r1=ctx.createRadialGradient(cx,cy,6,cx,cy,120); r1.addColorStop(0,'rgba('+rgb+','+.34*vis+')'); r1.addColorStop(.35,'rgba('+rgb+','+.1*vis+')'); r1.addColorStop(1,'rgba('+rgb+',0)');
+        ctx.fillStyle=r1; ctx.fillRect(cx-120,cy-120,240,240); }
+      // 5. shooting star: one every ~23 s on clear dark nights
+      if(T.P.stars>.5&&(!weather||weather==='clear')){
+        const cyc=23, k=Math.floor(t/cyc), ph=(t%cyc)/1.1;
+        if(ph<1){ const sx=120+hash(k)*640, sy=20+hash(k+9)*120, d=ph*130, a=Math.sin(ph*Math.PI);
+          const x1=sx+d, y1=sy+d*.42, tg=ctx.createLinearGradient(x1,y1,x1-70,y1-30);
+          tg.addColorStop(0,'rgba(255,255,255,'+.9*a+')'); tg.addColorStop(1,'rgba(180,190,255,0)');
+          ctx.strokeStyle=tg; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1-70,y1-30); ctx.stroke(); }
+      }
+    }
+    // 6. glints on water: short bright dashes that blink out of phase, brighter near the moon's column
+    if(sc.water&&!under){
+      const [wy0,wy1,o]=sc.water, cl=(o&&o.clip)||[0,480], N=Math.round((cl[1]-cl[0])*.55), cool=night>.5?'200,215,255':'255,235,190';
+      ctx.globalCompositeOperation='screen';
+      for(let i=0;i<N;i++){
+        const u=hash(i*3.1+sc.id.length), v=hash(i*7.7+1.3), x=cl[0]+u*(cl[1]-cl[0]), y=wy0+4+Math.pow(v,1.3)*(wy1-wy0-8);
+        const blink=Math.sin(t*(1.1+hash(i)*1.6)+i*2.3); if(blink<.55) continue;
+        const len=1+Math.round(v*3+hash(i+5)*2), a=(blink-.55)*2.2*(.25+.5*night);
+        ctx.fillStyle='rgba('+cool+','+a+')'; ctx.fillRect(Math.round(x*2),Math.round(y*2),len*2,2);
+      }
+    }
+    // 7. drifting ground mist
+    const m=NS.MIST[sc.id];
+    if(m&&!under){
+      const [my,mh,mk2,mrgb]=m; ctx.globalCompositeOperation='screen';
+      for(let i=0;i<7;i++){
+        const bx=((hash(i*5.3)*1200+t*(2.5+hash(i)*3))%1300)-170, by=(my+hash(i+2)*mh)*2, rw=150+hash(i+4)*180, rh=14+hash(i+7)*22;
+        const rg=ctx.createRadialGradient(bx,by,0,bx,by,rw); rg.addColorStop(0,'rgba('+mrgb+','+.16*mk2*(.5+night*.5)+')'); rg.addColorStop(1,'rgba('+mrgb+',0)');
+        ctx.save(); ctx.translate(bx,by); ctx.scale(1,rh/rw); ctx.translate(-bx,-by); ctx.fillStyle=rg; ctx.fillRect(bx-rw,by-rw,rw*2,rw*2); ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
 })();
