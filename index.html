@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lofi Leonida — endless lofi in Vice City</title>
+<meta name="description" content="Endless generative lofi in a pixel-art Leonida: the apartment above Vice City, the beach, the Keys, the swamp and more. Unofficial fan project.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/panels.css?v=8">
+<style>/* links to the object pages, styled like the other header items */ .top-links a{ font-family:var(--px); font-size:10px; letter-spacing:.02em; padding:8px 10px; color:var(--pink); text-decoration:none; } .top-links a:hover{ color:#fff; }</style>
+</head>
+<body>
+
+<header id="top">
+  <a class="brand" href="#apartment" aria-label="Lofi Leonida home"><span class="logo-px"></span>LOFI <b>LEONIDA</b></a>
+  <nav class="top-links">
+    <a href="https://lofi-leonida.pages.dev/vinyl">Vinyl</a>
+    <a href="https://lofi-leonida.pages.dev/cassette">Cassette</a>
+    <a href="https://lofi-leonida.pages.dev/cd">CD</a>
+    <a href="https://lofi-leonida.pages.dev/koi">Koi</a>
+    <button data-modal="about">About</button>
+    <button data-modal="places">Places</button>
+    <button data-modal="music">Music</button>
+    <button data-modal="keys">Shortcuts</button>
+    <button data-modal="faq">FAQ</button>
+  </nav>
+  <span class="gta-count" id="gtaCount" title="GTA VI launches November 19, 2026">GTA VI · --</span>
+  <span class="fan-tag">Unofficial fan project</span>
+</header>
+
+<main id="stage">
+  <div id="screen" tabindex="-1">
+    <canvas id="scene" width="960" height="540" aria-label="Animated pixel-art scene"></canvas>
+    <div id="fade"></div>
+    <div id="titleBlock">
+      <h1 id="locName">The Apartment</h1>
+      <p id="locSub">Rain over Vice City</p>
+      <p id="locTag"></p>
+      <p id="locTime"></p>
+    </div>
+    <div id="nowPlaying"><span id="npDot"></span><span id="npText">Press play for endless lofi</span><button id="favBtn" title="Favorite this track" aria-label="Favorite this track">♡</button><button id="linkBtn" title="Copy a link to this track" aria-label="Copy track link">🔗</button></div>
+    <button id="bigPlay" aria-label="Play music"><span>▶</span><em>Tap to play</em></button>
+    <div id="reactLayer"></div>
+    <button id="fsBtn" aria-label="Fullscreen" title="Fullscreen (F)">⛶</button>
+  </div>
+
+  <div id="picker" role="toolbar" aria-label="Choose a place">
+    <button id="prevLoc" aria-label="Previous place">‹</button>
+    <div id="nums"></div>
+    <button id="mapBtn" class="chip">Map</button>
+    <button id="nextLoc" aria-label="Next place">›</button>
+    <button id="tourBtn" class="chip">Tour: off</button>
+    <button id="timeBtn" class="chip">Time: live</button>
+  </div>
+</main>
+
+<div id="dock" role="toolbar" aria-label="Controls">
+  <button id="prevBtn" class="chip" aria-label="Previous track">⏮</button>
+  <button id="playBtn" class="chip hot" aria-label="Play or pause">▶ Play</button>
+  <button id="nextBtn" class="chip" aria-label="Next track">⏭</button>
+  <span class="sep"></span>
+  <button class="chip" data-panel="vibe">Vibe</button>
+  <button class="chip" data-panel="mixer">Mixer</button>
+  <button class="chip" data-panel="queue">Up next</button>
+  <button class="chip" data-panel="people">People</button>
+  <button class="chip" data-panel="weather">Weather</button>
+  <button class="chip" data-panel="sounds">Sounds</button>
+  <button class="chip" data-panel="focus">Focus</button>
+  <button class="chip" data-panel="tasks">Tasks</button>
+  <button class="chip" data-panel="notes">Notes</button>
+  <span class="sep"></span>
+  <button class="chip" id="reactBtn" title="Tap the scene to send a reaction">♥ Together</button>
+  <button class="chip" id="lanternBtn" title="Release a lantern (L)">Lantern</button>
+  <span class="sep"></span>
+  <button class="chip" data-panel="save">Save</button>
+  <button class="chip" data-panel="share">Share</button>
+  <button class="chip" data-panel="settings">⚙</button>
+</div>
+
+<div id="panels"></div>
+
+<footer id="foot">
+  <button data-modal="about">About</button><button data-modal="places">Places</button><button data-modal="music">Music</button><button data-modal="keys">Shortcuts</button><button data-modal="faq">FAQ</button>
+  <span>Original pixel art &amp; generated music. Not affiliated with Rockstar Games or Take-Two Interactive.</span>
+</footer>
+
+<div id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-x" id="modalX" aria-label="Close">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="mapModal" hidden>
+  <div class="modal-card wide" role="dialog" aria-modal="true" aria-label="Pick a place">
+    <button class="modal-x" id="mapX" aria-label="Close">×</button>
+    <div class="map-tabs">
+      <button id="tabMap" class="chip hot">Map</button><button id="tabPlaces" class="chip">Places</button><button id="tabGrid" class="chip">Grid</button>
+      <input id="placeSearch" type="text" placeholder="Search places…" autocomplete="off" aria-label="Search places">
+      <span class="map-note">Stylized pixel map · names from the community map, only the six regions are official</span>
+    </div>
+    <div id="mapView">
+      <div class="mapwrap" id="mapWrap">
+        <div id="mapInner"><canvas id="mapCanvas"></canvas><div id="plabels"></div><div id="pins"></div></div>
+        <div class="mapzoom"><button id="mzIn" aria-label="Zoom in">+</button><button id="mzOut" aria-label="Zoom out">−</button><button id="mzReset" aria-label="Reset">⌖</button></div>
+        <div class="mappop" id="mapPop" hidden></div>
+        <div class="maphint">Drag · wheel to zoom · click a name</div>
+      </div>
+      <ol id="mapList"></ol>
+    </div>
+    <div id="placesView" hidden></div>
+    <div id="gridView" hidden></div>
+  </div>
+</div>
+
+<script src="js/pixel.js"></script>
+<script src="js/cast.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/tod.js"></script>
+<script src="js/life.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/scenes-core.js"></script>
+<script src="js/newstyle.js?v=2"></script>
+<script src="js/details.js"></script>
+<script src="js/scene-apartment.js"></script>
+<script src="js/scenes-a.js"></script>
+<script src="js/scenes-b.js"></script>
+<script src="js/scenes-c.js"></script>
+<script src="js/scenes-d.js"></script>
+<script src="js/scene-meta.js"></script>
+<script src="js/hi.js"></script>
+<script src="js/map.js"></script>
+<script src="js/places.js"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
