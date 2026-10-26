@@ -132,13 +132,14 @@
       if(sc.water){ const [y0,y1,o]=sc.water, cl=(o&&o.clip)||[0,480]; mirror(low,y0,y1,cl[0],cl[1],.42,t,1); }
       const wt=NS.WET[sc.id]; if(wt){ const k=wt[2]*(weather&&weather!=='clear'?1.25:.8); mirror(low,wt[0],wt[1],0,480,k,t,.6); }
     }
+    if(NS.outpaint&&opt&&!NS.building){ opt.novig=true; NS.cur={sc,T,weather,opt}; }
     const out=render.apply(this,arguments);
     if(NS.on&&NS.finish&&opt&&opt.q==='high') finish(ctx,t,sc,weather,T);
     return out;
   };
 
   /* ---------- finishing layer: colour pop, horizon haze, moon halo, water glints, mist, shooting stars ---------- */
-  NS.finish=true;
+  NS.finish=true; NS.outpaint=true;
   const W2=960, H2=540, mk=(w,h)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
   const tmp=mk(W2,H2), tctx=tmp.getContext('2d'), glowA=mk(240,135), gA=glowA.getContext('2d'), glowB=mk(120,68), gB=glowB.getContext('2d');
   const hash=n=>{ const v=Math.sin(n*127.1+311.7)*43758.5453; return v-Math.floor(v); };

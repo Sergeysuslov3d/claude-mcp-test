@@ -68,7 +68,7 @@ window.FX = (function(){
     if(opt.q==='high'){
       if(opt.glow) bloom(ctx,.30);
       gradeFill(ctx,sc.id);
-      ctx.drawImage(vig,0,0);
+      if(!opt.novig) ctx.drawImage(vig,0,0);
       if(opt.grain){ const ox=(Math.random()*256)|0, oy=(Math.random()*256)|0; ctx.save(); ctx.globalAlpha=.075; ctx.fillStyle=ctx.createPattern(grain,'repeat'); ctx.translate(-ox,-oy); ctx.fillRect(ox,oy,W,H); ctx.restore(); }
       if(opt.lines){ ctx.save(); ctx.fillStyle=ctx.createPattern(lines,'repeat'); ctx.fillRect(0,0,W,H); ctx.restore(); }
     }

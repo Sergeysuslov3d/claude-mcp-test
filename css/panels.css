@@ -129,11 +129,13 @@ html,body{height:100%;overflow:hidden}
 /* pulled back: the whole scene is visible instead of being cropped to the window; --zoom is the share of the window it fills */
 :root{--zoom:.9}
 #screen{background:#0a0818}
-#sceneBg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;filter:brightness(.88);image-rendering:pixelated}
+#sceneBg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;image-rendering:pixelated}
 #scene{position:relative;object-fit:contain;transform-origin:50% 40%}
 @media(min-width:700px){ #scene{transform:scale(var(--zoom))} }
 #screen:fullscreen #scene{transform:none}
 #screen:fullscreen #sceneBg{display:none}
+@media(max-width:699px),(max-aspect-ratio:1/1){ #scene{object-fit:cover;transform:none} #sceneBg{display:none} }
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 75% 80% at 50% 48%,rgba(4,2,12,0) 55%,rgba(4,2,12,.2) 80%,rgba(4,2,12,.6) 100%)}
 #top{position:fixed;top:10px;right:12px;left:auto;z-index:12;gap:10px;padding:6px 10px;background:rgba(10,6,22,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
 #top .top-links{margin-left:0}
 #top .fan-tag{display:none}
@@ -154,3 +156,4 @@ body.ui-hide #top,body.ui-hide #picker,body.ui-hide #dock,body.ui-hide #nowPlayi
 #picker>button:not(.chip),#nums button{width:30px;height:30px}
 @media(max-width:1200px){ #nums{display:none} }
 @media(min-width:1201px){ #picker{flex-wrap:nowrap;width:max-content} }
+@media(max-width:699px),(max-aspect-ratio:1/1){ #vig{display:none} }
